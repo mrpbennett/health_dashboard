@@ -7,8 +7,8 @@ import psycopg2
 db = psycopg2.connect(
     dbname="postgres",
     user="postgres",
-    password="password",
-    host="192.168.5.52",
+    password="123qwe!!",
+    host="192.168.6.1",
 )
 
 logging.basicConfig(
@@ -226,12 +226,11 @@ def insert_garmin_sleep_body_battery(data) -> bool:
     return False
 
 
-def insert_garmin_stats(data) -> bool:
+def insert_garmin_stats(data) -> bool:  # sourcery skip: extract-method
 
     try:
 
         row_data = {
-            "id": data["userDailySummaryId"],
             "day": data["calendarDate"],
             "total_calories": data["totalKilocalories"],
             "active_calories": data["activeKilocalories"],
@@ -277,7 +276,6 @@ def insert_garmin_stats(data) -> bool:
         }
 
         columns = [
-            "id",
             "day",
             "total_calories",
             "active_calories",
@@ -339,6 +337,52 @@ def insert_garmin_stats(data) -> bool:
                 curs.execute(
                     f"""
                         INSERT INTO garmin.stats ({', '.join(columns)}) 
+                        VALUES ({', '.join(['%s'] * len(values))})
+                    """,
+                    tuple(values),
+                )
+        return True
+
+    except KeyError as ke:
+        logging.error(f"Missing key in data: {ke}")
+    except Exception as e:
+        logging.error(f"Error inserting data: {e}")
+
+    return False
+
+
+# CREATE TABLE garmin.readiness (
+#     day DATE,
+#     level VARCHAR(255),
+#     feedback VARCHAR(255),
+#     score INT,
+#     acute_load INT,
+#     hrv_weekly_avg INT
+# );
+
+
+def insert_garmin_readiness(data) -> bool:
+
+    try:
+        row_data = {
+            "day": data[0]["calendarDate"],
+            "level": data[0]["level"],
+            "feedback": data[0]["feedbackShort"],
+            "score": data[0]["score"],
+            "acute_load": data[0]["acuteLoad"],
+            "hrv_weekly_avg": data[0]["hrvWeeklyAverage"],
+        }
+
+        columns = ["day", "level", "feedback", "score", "acute_load", "hrv_weekly_avg"]
+
+        values = [row_data[col] for col in columns]
+
+        with db as conn:
+
+            with conn.cursor() as curs:
+                curs.execute(
+                    f"""
+                        INSERT INTO garmin.readiness ({', '.join(columns)}) 
                         VALUES ({', '.join(['%s'] * len(values))})
                     """,
                     tuple(values),

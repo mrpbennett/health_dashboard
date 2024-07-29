@@ -6,8 +6,8 @@ import psycopg2
 db = psycopg2.connect(
     dbname="postgres",
     user="postgres",
-    password="password",
-    host="192.168.5.52",
+    password="123qwe!!",
+    host="192.168.6.1",
 )
 
 logging.basicConfig(

@@ -7,6 +7,7 @@ import garminconnect
 import tomli
 
 from garmin_transform import (
+    insert_garmin_readiness,
     insert_garmin_sleep,
     insert_garmin_sleep_body_battery,
     insert_garmin_sleep_heart_rate,
@@ -65,6 +66,7 @@ garmin.garth.dump(GARTH_HOME)
 # GARMIN DATA
 get_stats_and_body = garmin.get_stats_and_body(yesterday)
 get_sleep_data = garmin.get_sleep_data(yesterday)
+get_garmin_readiness = garmin.get_training_readiness(yesterday)
 
 
 # OURA RING
@@ -98,6 +100,11 @@ def main():
     # TABLE - garmin.stats
     if insert_garmin_stats(get_stats_and_body):
         logging.info("garmin.stats has been updated")
+
+    # READINESS -------------------------------------------
+    # TABLE - garmin.readiness
+    if insert_garmin_readiness(get_garmin_readiness):
+        logging.info("garmin.readiness has been updated")
 
     # OURA RING
 
